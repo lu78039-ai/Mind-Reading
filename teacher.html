@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心機讀心術 - 教師端控制台</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg: #0F172A;
+            --surface: #1E293B;
+            --text: #F8FAFC;
+            --text-muted: #94A3B8;
+            --accent: #10B981;
+            --danger: #EF4444;
+            --border: #334155;
+            --winner-bg: rgba(251, 191, 36, 0.15);
+            --winner-border: #FBBF24;
+            --winner-text: #FBBF24;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .control-panel {
+            background-color: var(--surface);
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: var(--primary-hover); }
+        button:disabled {
+            background-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        button.accent { background-color: var(--accent); }
+        button.accent:hover { background-color: #059669; }
+        
+        button.danger { background-color: var(--danger); }
+        button.danger:hover { background-color: #DC2626; }
+
+        .status-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        /* 統計結果面板 */
+        .stats-panel {
+            display: none; /* 預設隱藏，揭曉時顯示 */
+            width: 100%;
+            max-width: 1200px;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-panel.active {
+            display: grid;
+        }
+
+        .stat-box {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-box.target {
+            border-color: var(--accent);
+            background-color: rgba(16, 185, 129, 0.05);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .stat-box.target .stat-value {
+            color: var(--accent);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* 學生網格面板 */
+        .grid-panel {
+            display: none; /* 預設隱藏 */
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .grid-panel.active {
+            display: block;
+        }
+
+        .student-grid {
+            display: grid;
+            /* 一列 10 個，配合 25-40 人 */
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0.75rem;
+        }
+
+        .student-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 80px;
+            transition: transform 0.2s;
+        }
+
+        .student-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--text-muted);
+        }
+
+        .student-card.winner {
+            background-color: var(--winner-bg);
+            border-color: var(--winner-border);
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        .student-name {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .student-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .student-card.winner .student-number {
+            color: var(--winner-text);
+        }
+
+        .student-card.winner .student-name {
+            color: var(--winner-text);
+            font-weight: 600;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+        }
+
+        @media (max-width: 1024px) {
+            .student-grid { grid-template-columns: repeat(5, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>心機讀心術 - 教師端</h1>
+
+    <div class="control-panel">
+        <button id="fetchDataBtn">🔄 1. 載入試算表資料</button>
+        <div class="status-text" id="statusText">尚未載入資料</div>
+        <button id="revealBtn" class="accent" disabled>🎯 2. 揭曉結果</button>
+        <button id="clearBtn" class="danger">🗑️ 清空試算表</button>
+    </div>
+
+    <div class="stats-panel" id="statsPanel">
+        <div class="stat-box">
+            <div class="stat-value" id="avgValue">0.00</div>
+            <div class="stat-label">全班平均值</div>
+        </div>
+        <div class="stat-box target">
+            <div class="stat-value" id="targetValue">0.00</div>
+            <div class="stat-label">目標值 (平均值 × 2/3)</div>
+        </div>
+    </div>
+
+    <div class="grid-panel" id="gridPanel">
+        <h2 style="margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">學生輸入紀錄 (<span id="finalCount">0</span> 人)</h2>
+        <div class="student-grid" id="studentGrid">
+            <!-- 學生卡片會在這裡產生 -->
+        </div>
+    </div>
+
+    <script>
+        // 🚨 老師請注意：請將下方的字串替換為您部署的 Google Apps Script 網址
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyUYaXhA919JqGYu311SoIZV5TP370goliU-dn8DdBIikTu3MzCXCwCeHl7r7UO1CcacQ/exec"; 
+
+        const fetchDataBtn = document.getElementById('fetchDataBtn');
+        const revealBtn = document.getElementById('revealBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusText = document.getElementById('statusText');
+        
+        const statsPanel = document.getElementById('statsPanel');
+        const gridPanel = document.getElementById('gridPanel');
+        const studentGrid = document.getElementById('studentGrid');
+        
+        const avgValueDisplay = document.getElementById('avgValue');
+        const targetValueDisplay = document.getElementById('targetValue');
+        const finalCountDisplay = document.getElementById('finalCount');
+
+        let currentData = [];
+
+        // 1. 載入試算表資料
+        fetchDataBtn.addEventListener('click', async () => {
+            if (!GAS_URL || GAS_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
+                alert("請先在程式碼中設定 GAS_URL！");
+                return;
+            }
+
+            fetchDataBtn.disabled = true;
+            statusText.textContent = "資料載入中...";
+            
+            try {
+                const response = await fetch(GAS_URL);
+                const data = await response.json();
+                
+                currentData = data;
+                statusText.textContent = `目前已載入：${currentData.length} 人`;
+                
+                // 隱藏揭曉畫面，等待老師點擊揭曉
+                statsPanel.classList.remove('active');
+                gridPanel.classList.remove('active');
+                
+                if (currentData.length > 0) {
+                    revealBtn.disabled = false;
+                } else {
+                    revealBtn.disabled = true;
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                statusText.textContent = "❌ 載入失敗，請檢查網路或 GAS 網址";
+            } finally {
+                fetchDataBtn.disabled = false;
+            }
+        });
+
+        // 2. 揭曉結果
+        revealBtn.addEventListener('click', () => {
+            if (currentData.length === 0) return;
+
+            // 算平均
+            const sum = currentData.reduce((acc, curr) => acc + curr.number, 0);
+            const avg = sum / currentData.length;
+            const target = avg * (2 / 3);
+
+            avgValueDisplay.textContent = avg.toFixed(2);
+            targetValueDisplay.textContent = target.toFixed(2);
+            finalCountDisplay.textContent = currentData.length;
+
+            // 找贏家
+            let closestDiff = Infinity;
+            let winners = [];
+
+            currentData.forEach(student => {
+                const diff = Math.abs(student.number - target);
+                if (Math.abs(diff - closestDiff) < 0.0001) {
+                    winners.push(student.name); // 用姓名作為辨識
+                } else if (diff < closestDiff) {
+                    closestDiff = diff;
+                    winners = [student.name];
+                }
+            });
+
+            // 渲染網格
+            studentGrid.innerHTML = '';
+            
+            currentData.forEach(student => {
+                const isWinner = winners.includes(student.name);
+                const card = document.createElement('div');
+                card.className = `student-card ${isWinner ? 'winner' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="student-name">${student.name}</div>
+                    <div class="student-number">${student.number}</div>
+                    ${isWinner ? '<div style="font-size:0.75rem; color:var(--winner-text); margin-top:0.25rem;">👑 贏家</div>' : ''}
+                `;
+                studentGrid.appendChild(card);
+            });
+
+            // 顯示面板
+            statsPanel.classList.add('active');
+            gridPanel.classList.add('active');
+            
+            // 捲動到結果區
+            statsPanel.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // 3. 清空試算表
+        clearBtn.addEventListener('click', async () => {
+            if (!confirm("⚠️ 確定要清空試算表上所有學生的資料嗎？此動作無法復原！")) return;
+            
+            clearBtn.disabled = true;
+            statusText.textContent = "清除中...";
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'clear' })
+                });
+                const result = await response.json();
+                
+                if (result.status === "cleared") {
+                    statusText.textContent = "✅ 資料已清空";
+                    currentData = [];
+                    revealBtn.disabled = true;
+                    statsPanel.classList.remove('active');
+                    gridPanel.classList.remove('active');
+                }
+            } catch (error) {
+                console.error("Clear Error:", error);
+                statusText.textContent = "❌ 清除失敗";
+            } finally {
+                clearBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

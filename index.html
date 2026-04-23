@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心機讀心術 - 學生端</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg: #0F172A;
+            --surface: #1E293B;
+            --text: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border: #334155;
+            --success: #10B981;
+            --danger: #EF4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            background-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        #message {
+            margin-top: 1.5rem;
+            font-weight: 500;
+            min-height: 1.5rem;
+        }
+
+        .success-text { color: var(--success); }
+        .error-text { color: var(--danger); }
+        .loading-text { color: #FBBF24; }
+
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>心機讀心術</h1>
+        <p class="subtitle">請輸入你的座號與數字 (0-100)，<br>送出後請靜待老師公布結果。</p>
+
+        <form id="studentForm">
+            <div class="form-group">
+                <label for="playerName">姓名 / 座號</label>
+                <input type="text" id="playerName" required autocomplete="off" placeholder="例如：1號">
+            </div>
+            <div class="form-group">
+                <label for="playerNumber">輸入數字 (0-100)</label>
+                <input type="number" id="playerNumber" required min="0" max="100" placeholder="0 ~ 100">
+            </div>
+            
+            <button type="submit" id="submitBtn">送出數字</button>
+        </form>
+        
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // 🚨 老師請注意：請將下方的字串替換為您部署的 Google Apps Script 網址
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyUYaXhA919JqGYu311SoIZV5TP370goliU-dn8DdBIikTu3MzCXCwCeHl7r7UO1CcacQ/exec"; 
+
+        const form = document.getElementById('studentForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageEl = document.getElementById('message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!GAS_URL || GAS_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
+                showMessage("錯誤：請老師先在程式碼設定 Google Apps Script 網址。", "error-text");
+                return;
+            }
+
+            const name = document.getElementById('playerName').value.trim();
+            const number = parseInt(document.getElementById('playerNumber').value, 10);
+
+            if (!name || isNaN(number) || number < 0 || number > 100) {
+                showMessage("請確認資料填寫正確 (數字需在 0-100 之間)", "error-text");
+                return;
+            }
+
+            // 鎖定按鈕防止重複送出
+            submitBtn.disabled = true;
+            submitBtn.textContent = "傳送中...";
+            showMessage("資料傳送中，請稍候...", "loading-text");
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ name: name, number: number })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    showMessage("送出成功！請靜待老師公布結果。", "success-text");
+                    form.reset();
+                } else {
+                    throw new Error("伺服器回傳異常");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                showMessage("傳送失敗，請檢查網路連線後再試一次。", "error-text");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "送出數字";
+            }
+        });
+
+        function showMessage(text, className) {
+            messageEl.textContent = text;
+            messageEl.className = className;
+        }
+    </script>
+</body>
+</html>

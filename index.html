@@ -8,119 +8,160 @@
         :root {
             --primary: #4F46E5;
             --primary-hover: #4338CA;
-            --bg: #0F172A;
-            --surface: #1E293B;
-            --text: #F8FAFC;
-            --text-muted: #94A3B8;
-            --border: #334155;
+            --bg: #F1F5F9;
+            --surface: #FFFFFF;
+            --text: #1E293B;
+            --text-muted: #64748B;
+            --border: #E2E8F0;
             --success: #10B981;
             --danger: #EF4444;
+            --accent: #F59E0B;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
         }
 
         body {
             background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
             color: var(--text);
-            min-height: 100vh;
+            min-height: 100svh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 2rem;
+            padding: 1.5rem;
+            overflow: hidden;
         }
 
         .card {
             background-color: var(--surface);
-            border-radius: 1rem;
-            padding: 2.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border);
+            border-radius: 2rem;
+            padding: 3rem 2.5rem;
+            box-shadow: 
+                0 20px 25px -5px rgba(0, 0, 0, 0.05),
+                0 8px 10px -6px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(0, 0, 0, 0.02);
             width: 100%;
-            max-width: 450px;
+            max-width: 440px;
             text-align: center;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            border-radius: 2rem 2rem 0 0;
         }
 
         h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #60A5FA, #A78BFA);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.025em;
+            color: #0F172A;
         }
 
         p.subtitle {
             color: var(--text-muted);
-            margin-bottom: 2rem;
-            line-height: 1.5;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            font-size: 1rem;
+            font-weight: 500;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.75rem;
             text-align: left;
         }
 
         label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-muted);
-            font-weight: 500;
+            margin-bottom: 0.6rem;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.95rem;
         }
 
         input {
             width: 100%;
-            padding: 0.875rem 1rem;
-            background-color: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
+            padding: 1rem 1.25rem;
+            background-color: #F8FAFC;
+            border: 2px solid var(--border);
+            border-radius: 1rem;
             color: var(--text);
             font-size: 1.1rem;
-            transition: all 0.2s;
+            font-weight: 500;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
         }
 
         button {
             width: 100%;
-            padding: 1rem;
+            padding: 1.1rem;
             background-color: var(--primary);
             color: white;
             border: none;
-            border-radius: 0.5rem;
-            font-size: 1.1rem;
-            font-weight: 600;
+            border-radius: 1rem;
+            font-size: 1.2rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             margin-top: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
         }
 
         button:hover {
             background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
 
         button:disabled {
             background-color: var(--border);
             color: var(--text-muted);
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         #message {
             margin-top: 1.5rem;
-            font-weight: 500;
+            font-weight: 600;
             min-height: 1.5rem;
+            font-size: 1rem;
         }
 
         .success-text { color: var(--success); }
         .error-text { color: var(--danger); }
-        .loading-text { color: #FBBF24; }
+        .loading-text { color: var(--accent); }
+
+        /* 裝飾性元素 */
+        .decor {
+            position: absolute;
+            z-index: -1;
+            opacity: 0.1;
+        }
 
     </style>
 </head>
@@ -128,20 +169,26 @@
 
     <div class="card">
         <h1>心機讀心術</h1>
-        <p class="subtitle">請輸入你的座號與數字 (0-100)，<br>送出後請靜待老師公布結果。</p>
+        <p class="subtitle">誰能比別人「多想一步」？<br>輸入數字，挑戰最強大腦！</p>
 
         <form id="studentForm">
             <div class="form-group">
                 <label for="playerName">姓名 / 座號</label>
-                <input type="text" id="playerName" required autocomplete="off" placeholder="例如：1號">
+                <input type="text" id="playerName" required autocomplete="off" placeholder="例如：12 號">
             </div>
             <div class="form-group">
-                <label for="playerNumber">輸入數字 (0-100)</label>
-                <input type="number" id="playerNumber" required min="0" max="100" placeholder="0 ~ 100">
+                <label for="playerNumber">輸入一個整數 (0-100)</label>
+                <input type="number" id="playerNumber" required min="0" max="100" placeholder="0 ~ 100" inputmode="numeric">
             </div>
             
             <button type="submit" id="submitBtn">送出數字</button>
         </form>
+
+        <div id="submittedView" style="display: none; padding: 2rem 0;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+            <h2 style="color: var(--success); margin-bottom: 0.5rem;">你已完成提交</h2>
+            <p style="color: var(--text-muted);">請等待老師揭曉結果，<br>本裝置不可重複投票。</p>
+        </div>
         
         <div id="message"></div>
     </div>
@@ -151,11 +198,24 @@
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyUYaXhA919JqGYu311SoIZV5TP370goliU-dn8DdBIikTu3MzCXCwCeHl7r7UO1CcacQ/exec"; 
 
         const form = document.getElementById('studentForm');
+        const submittedView = document.getElementById('submittedView');
         const submitBtn = document.getElementById('submitBtn');
         const messageEl = document.getElementById('message');
 
+        // 檢查是否已經提交過 (防作弊)
+        const checkSubmission = () => {
+            if (localStorage.getItem('mindGame_submitted')) {
+                form.style.display = 'none';
+                submittedView.style.display = 'block';
+                return true;
+            }
+            return false;
+        };
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            if (checkSubmission()) return;
             
             if (!GAS_URL || GAS_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
                 showMessage("錯誤：請老師先在程式碼設定 Google Apps Script 網址。", "error-text");
@@ -170,10 +230,9 @@
                 return;
             }
 
-            // 鎖定按鈕防止重複送出
             submitBtn.disabled = true;
             submitBtn.textContent = "傳送中...";
-            showMessage("資料傳送中，請稍候...", "loading-text");
+            showMessage("正在將你的智慧傳送到雲端...", "loading-text");
 
             try {
                 const response = await fetch(GAS_URL, {
@@ -184,8 +243,11 @@
                 const result = await response.json();
                 
                 if (result.status === "success") {
-                    showMessage("送出成功！請靜待老師公布結果。", "success-text");
-                    form.reset();
+                    localStorage.setItem('mindGame_submitted', 'true'); // 標記已提交
+                    showMessage("🎉 送出成功！", "success-text");
+                    setTimeout(() => {
+                        checkSubmission();
+                    }, 1000);
                 } else {
                     throw new Error("伺服器回傳異常");
                 }
@@ -201,6 +263,9 @@
             messageEl.textContent = text;
             messageEl.className = className;
         }
+
+        // 初始檢查
+        checkSubmission();
     </script>
 </body>
 </html>
